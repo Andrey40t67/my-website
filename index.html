@@ -1,0 +1,86 @@
+# my-website<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой сайт</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        #login {
+            margin: 20px;
+        }
+        #content {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Добро пожаловать на мой сайт!</h1>
+    <div id="login">
+        <button id="login-btn">Войти через Google</button>
+    </div>
+    <div id="content">
+        <h2>Загружайте свои фотографии и видео здесь</h2>
+        <input type="file" id="fileInput" />
+        <button id="upload-btn">Загрузить</button>
+        <p id="status"></p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+    <script>
+        // Конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "ВАШ_API_KEY",
+            authDomain: "ВАШ_DOMAIN.firebaseapp.com",
+            projectId: "ВАШ_PROJECT_ID",
+            storageBucket: "ВАШ_STORAGE_BUCKET.appspot.com",
+            messagingSenderId: "ВАШ_SENDER_ID",
+            appId: "ВАШ_APP_ID"
+        };
+        
+        // Инициализация Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const storage = firebase.storage();
+
+        const loginBtn = document.getElementById('login-btn');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('upload-btn');
+        const status = document.getElementById('status');
+        const content = document.getElementById('content');
+
+        loginBtn.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    document.getElementById('login').style.display = 'none';
+                    content.style.display = 'block';
+                })
+                .catch((error) => {
+                    console.error('Ошибка авторизации', error);
+                });
+        });
+
+        uploadBtn.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                const storageRef = storage.ref('uploads/' + file.name);
+                storageRef.put(file).then(() => {
+                    status.textContent = 'Файл успешно загружен!';
+                }).catch((error) => {
+                    status.textContent = 'Ошибка загрузки: ' + error.message;
+                });
+            } else {
+                status.textContent = 'Выберите файл для загрузки';
+            }
+        });
+    </script>
+</body>
+</html>
